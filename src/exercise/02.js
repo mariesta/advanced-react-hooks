@@ -10,7 +10,7 @@ import {
   PokemonErrorBoundary,
 } from '../pokemon'
 
-function pokemonInfoReducer(state, action) {
+function asyncReducer(state, action) {
   switch (action.type) {
     case 'pending': {
       return {status: 'pending', data: null, error: null}
@@ -28,14 +28,12 @@ function pokemonInfoReducer(state, action) {
 }
 
 function useAsync(initialState) {
-  const [state, dispatch] = React.useReducer(pokemonInfoReducer, {
+  const [state, dispatch] = React.useReducer(asyncReducer, {
     status: 'idle',
     data: null,
     error: null,
     ...initialState
   })
-
-  const {data, error, status} = state
 
   const run = React.useCallback(promise => {
     dispatch({type: 'pending'})
@@ -50,9 +48,7 @@ function useAsync(initialState) {
   }, [])
 
   return {
-    error,
-    status,
-    data,
+    ...state,
     run,
   }
 }
@@ -60,8 +56,7 @@ function useAsync(initialState) {
 function PokemonInfo({pokemonName}) {
 
   const {data: pokemon, status, error, run} = useAsync({status: pokemonName ? 'pending' : 'idle'})
-  console.log("status: ", status)
-  console.log("pokemon: ", pokemon)
+
   React.useEffect(() => {
     if (!pokemonName) {
       return
